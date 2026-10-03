@@ -1,0 +1,61 @@
+using System;
+using System.Net.PeerToPeer;
+using System.ServiceModel;
+using Microsoft.Crm.Sdk.Messages;
+using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Metadata;
+using Microsoft.Xrm.Sdk.Query;
+using Microsoft.Xrm.Tooling.Connector;
+  
+namespace ConsoleApp1
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.Title = "Console App Demo";
+            Console.WriteLine("Console: Start");
+            string username = "admin@M365x13047774.onmicrosoft.com";
+            string password = "=9[4x(o9$HIp=2~a(zDtN9A66hN5Q{Kr";
+            string url = "https://org045813e5.api.crm.dynamics.com";
+            string connectionString = "AuthType=OAuth;Username=" + username + ";Password='" + password + "';Url=" + url + ";AppId=51f81489-12ee-4a9e-aaae-a2591f45987d;RedirectUri=app://58145B91-0C36-4500-8554-080854F2AC97;LoginPrompt=Auto";
+            try
+            {
+                Console.WriteLine("Connecting using XRM Tooling");
+                CrmServiceClient crmSrv = new CrmServiceClient(connectionString);
+                if (crmSrv.IsReady)
+                {
+                    Console.WriteLine("Connected");
+                    
+                }
+                else
+                {
+                    throw new Exception("Fail to connect");
+                }
+                Console.WriteLine("Version={0}", crmSrv.ConnectedOrgVersion);
+                Console.WriteLine("Organization={0}", crmSrv.ConnectedOrgUniqueName);
+  
+                Console.WriteLine("Retrieve current user");
+                Guid currentuserid = ((WhoAmIResponse)crmSrv.Execute(new WhoAmIRequest())).UserId;
+                Entity systemUser = (Entity)crmSrv.Retrieve("systemuser", currentuserid, new ColumnSet(new string[] { "firstname", "lastname" }));
+                Console.WriteLine("Logged on user is {0} {1}.", systemUser["firstname"], systemUser["lastname"]);
+                Console.WriteLine("Create Contact");
+                Entity newContact = new Entity("contact");
+                newContact["lastname"] = "TestingLst";
+                Guid contactid = crmSrv.Create(newContact);
+                Console.WriteLine("Contact ID is {0}", contactid.ToString());
+                Console.WriteLine("Permit console : End");
+                // Pause the console so it does not close.
+                Console.WriteLine("Press the <Enter> key to exit.");
+                Console.ReadLine();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.Read();
+            }
+  
+        }
+    }
+}
+
